@@ -1,0 +1,45 @@
+[project]
+name = "keitaro-workbench"
+version = "0.1.0"
+description = "Campaign creation and persistent offer drafts for Keitaro"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.30,<1",
+  "sqlalchemy[asyncio]>=2.0,<2.1",
+  "asyncpg>=0.30,<1",
+  "alembic>=1.14,<2",
+  "pydantic-settings>=2.7,<3",
+  "httpx>=0.28,<1",
+  "orjson>=3.10,<4",
+  "pycountry>=24.6,<27",
+]
+
+[dependency-groups]
+dev = [
+  "ruff>=0.14,<1",
+  "mypy>=1.15,<2",
+  "pytest>=8,<10",
+  "pytest-asyncio>=1,<2",
+  "respx>=0.22,<1",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["app", "tests", "scripts"]
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+addopts = "-ra -q --strict-markers"
