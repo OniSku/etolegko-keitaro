@@ -35,7 +35,7 @@ ignore = ["E501"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["app", "tests", "scripts"]
+files = ["app", "tests", "scripts", "migrations"]
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
