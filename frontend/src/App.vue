@@ -232,6 +232,8 @@ onMounted(() => {
       <label class="block text-sm font-semibold"
         >Ключ доступа
         <input
+          id="access-key"
+          name="access-key"
           v-model="token"
           :class="`${input} mt-2`"
           type="password"
@@ -317,6 +319,8 @@ onMounted(() => {
         <fieldset :disabled="busy" class="mt-6 grid gap-5 sm:grid-cols-2">
           <label class="text-sm font-semibold sm:col-span-2"
             >Название<input
+              id="campaign-name"
+              name="campaign-name"
               v-model="form.name"
               :class="`${input} mt-2`"
               required
@@ -328,6 +332,8 @@ onMounted(() => {
           >
           <label class="text-sm font-semibold"
             >Страна<select
+              id="campaign-country"
+              name="campaign-country"
               v-model="form.country"
               :class="`${input} mt-2`"
               required
@@ -340,6 +346,8 @@ onMounted(() => {
           >
           <label class="text-sm font-semibold"
             >Оффер<select
+              id="campaign-offer"
+              name="campaign-offer"
               v-model.number="form.offer_id"
               :class="`${input} mt-2`"
               required
@@ -352,6 +360,8 @@ onMounted(() => {
           >
           <label class="text-sm font-semibold"
             >Домен<select
+              id="campaign-domain"
+              name="campaign-domain"
               v-model.number="form.domain_id"
               :class="`${input} mt-2`"
               required
@@ -364,6 +374,8 @@ onMounted(() => {
           >
           <label class="text-sm font-semibold"
             >Группа<select
+              id="campaign-group"
+              name="campaign-group"
               v-model.number="form.group_id"
               :class="`${input} mt-2`"
               required
@@ -376,6 +388,8 @@ onMounted(() => {
           >
           <label class="text-sm font-semibold"
             >Источник<select
+              id="campaign-source"
+              name="campaign-source"
               v-model.number="form.traffic_source_id"
               :class="`${input} mt-2`"
               required
@@ -400,6 +414,8 @@ onMounted(() => {
         <aside>
           <label class="text-sm font-semibold"
             >Кампании<input
+              id="campaign-search"
+              name="campaign-search"
               v-model="search"
               :class="`${input} mt-2`"
               placeholder="Название или ID"
@@ -488,6 +504,8 @@ onMounted(() => {
           <template v-else>
             <label class="mb-4 flex items-center gap-2 text-xs text-slate-600"
               ><input
+                id="show-archived-offers"
+                name="show-archived-offers"
                 v-model="showArchive"
                 type="checkbox"
                 class="size-4 accent-sky-700"
@@ -603,6 +621,8 @@ onMounted(() => {
                             >0%</span
                           ><template v-else
                             ><input
+                              :id="`share-${s.id}-${o.offer_id}`"
+                              :name="`share-${s.id}-${o.offer_id}`"
                               type="number"
                               min="0"
                               max="100"
@@ -675,6 +695,8 @@ onMounted(() => {
                   <label class="min-w-48 flex-1"
                     ><span class="sr-only">Добавить оффер в {{ s.name }}</span
                     ><input
+                      :id="`offer-id-${s.id}`"
+                      :name="`offer-id-${s.id}`"
                       v-model.number="addIds[s.id]"
                       type="number"
                       min="1"

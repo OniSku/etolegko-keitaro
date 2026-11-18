@@ -77,10 +77,28 @@ def create_app(settings: Settings | None = None, gateway: Keitaro | None = None)
         return problem_response(request, error.status_code, str(error.detail))
 
     @app.exception_handler(RequestValidationError)
-    async def validation_error(request: Request, _error: RequestValidationError) -> Response:
-        return problem_response(
-            request, 422, "Проверьте обязательные поля, типы, диапазоны и код страны."
-        )
+    async def validation_error(request: Request, error: RequestValidationError) -> Response:
+        messages = {
+            "share": "Доля оффера должна быть целым числом от 0 до 100%.",
+            "country": "Укажите существующий код страны из двух латинских букв.",
+            "name": "Проверьте название кампании: оно не должно быть пустым или слишком длинным.",
+            "offer_id": "Укажите положительный целочисленный ID оффера.",
+            "domain_id": "Выберите домен.",
+            "group_id": "Выберите группу.",
+            "traffic_source_id": "Выберите источник.",
+            "revision": "Обновите состояние потока и повторите действие.",
+            "action": "Выберите допустимое действие с оффером.",
+            "Idempotency-Key": "Для операции нужен корректный Idempotency-Key в формате UUID.",
+        }
+        details = []
+        for issue in error.errors():
+            if issue["type"] == "json_invalid":
+                details.append("Некорректный JSON запроса.")
+            else:
+                details.append(
+                    messages.get(str(issue["loc"][-1]), "Некорректные параметры запроса.")
+                )
+        return problem_response(request, 422, " ".join(dict.fromkeys(details)))
 
     @app.exception_handler(SQLAlchemyError)
     async def database_error(request: Request, _error: SQLAlchemyError) -> Response:
@@ -103,10 +121,12 @@ def create_app(settings: Settings | None = None, gateway: Keitaro | None = None)
         supplied = (
             authorization[7:] if authorization and authorization.startswith("Bearer ") else ""
         )
+        if not supplied:
+            raise Problem(401, "Введите ключ доступа.")
         if not secrets.compare_digest(
             supplied.encode(), config.app_token.get_secret_value().encode()
         ):
-            raise Problem(401, "Укажите ключ доступа к локальной обёртке.")
+            raise Problem(401, "Неверный ключ доступа.")
 
     async def database() -> AsyncIterator[AsyncSession]:
         async with factory() as session, session.begin():

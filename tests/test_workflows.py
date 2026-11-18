@@ -271,6 +271,66 @@ async def test_auth_and_campaign_ownership(client: httpx.AsyncClient, tracker: T
     assert blocked.status_code == 403
 
 
+@pytest.mark.parametrize(
+    "header,detail",
+    [
+        ("", "Введите ключ доступа."),
+        ("Bearer ", "Введите ключ доступа."),
+        ("Bearer invalid", "Неверный ключ доступа."),
+    ],
+)
+async def test_auth_distinguishes_missing_and_incorrect_keys(
+    client: httpx.AsyncClient,
+    tracker: Tracker,
+    header: str,
+    detail: str,
+) -> None:
+    response = await client.get("/api/v1/resources", headers={"Authorization": header})
+    assert response.status_code == 401
+    assert response.json()["detail"] == detail
+    assert not tracker.calls
+
+
+@pytest.mark.parametrize("share", [-1, 120, 12.5, "not-a-number"])
+async def test_invalid_share_identifies_the_percentage_field(
+    client: httpx.AsyncClient,
+    tracker: Tracker,
+    share: int | float | str,
+) -> None:
+    response = await write(
+        client,
+        "/streams/502/offers",
+        {
+            "revision": 1,
+            "action": "pin",
+            "offer_id": 11,
+            "share": share,
+        },
+        "PATCH",
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Доля оффера должна быть целым числом от 0 до 100%."
+    assert response.headers["content-type"] == "application/problem+json"
+    assert not tracker.calls
+
+
+async def test_invalid_country_does_not_report_unrelated_fields(client: httpx.AsyncClient) -> None:
+    response = await write(
+        client,
+        "/campaigns",
+        {
+            "name": "sample",
+            "country": "ZZ",
+            "offer_id": 11,
+            "domain_id": 1,
+            "group_id": 1,
+            "traffic_source_id": 1,
+        },
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Укажите существующий код страны из двух латинских букв."
+
+
 async def test_two_tabs_cannot_overwrite_one_revision(client: httpx.AsyncClient) -> None:
     stream = await imported(client)
     one, two = await asyncio.gather(
